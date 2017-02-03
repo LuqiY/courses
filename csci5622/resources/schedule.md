@@ -22,7 +22,7 @@
 | 02.03        | 		         | 			   |  									 |			| [Groups](https://github.com/chrisketelsen/courses/blob/master/csci5622/project/assign.md)											  | 
 | 02.06        | 				 | 			   | Validation / Eval Metrics 			 |          |			| 
 | 02.08        | 				 | 			   | Feature Engineering 				 |	 		|			| 
-| 02.10        | 		         | 			   |  									 |			| LogReg	| 
+| 02.10        | 		         | 			   |  									 |			| [LogReg](https://github.com/chrisketelsen/courses/blob/master/csci5622/homework/logreg/assign.md)	                                  | 
 | 02.13        | Mohri 2         | 			   | Learning Theory Part 1			     |          |			| 
 | 02.15        | Mohri 3.2-3.3   | 			   | Learning Theory Part 2				 |	 		|			| 
 | 02.17        | 		         | 			   |  									 |			| FeatEngr	| 
