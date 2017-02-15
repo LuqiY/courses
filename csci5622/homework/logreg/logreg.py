@@ -1,10 +1,11 @@
 import random
 import argparse
+# Student Name: Fan You
 
-from numpy import zeros, sign 
+from numpy import zeros, sign
+import numpy as np
 from math import exp, log
 from collections import defaultdict
-
 
 kSEED = 1735
 kBIAS = "BIAS_CONSTANT"
@@ -29,6 +30,7 @@ class Example:
     """
     Class to represent a logistic regression example
     """
+
     def __init__(self, label, words, vocab, df):
         """
         Create a new example
@@ -57,13 +59,13 @@ class LogReg:
         :param lam: Regularization parameter
         :param eta: A function that takes the iteration as an argument (the default is a constant value)
         """
-        
+
         self.w = zeros(num_features)
         self.lam = lam
         self.eta = eta
         self.last_update = defaultdict(int)
 
-        assert self.lam>= 0, "Regularization parameter must be non-negative"
+        assert self.lam >= 0, "Regularization parameter must be non-negative"
 
     def progress(self, examples):
         """
@@ -97,15 +99,32 @@ class LogReg:
         :param use_tfidf: A boolean to switch between the raw data and the tfidf representation
         :return: Return the new value of the regression coefficients
         """
-        
-        # TODO: Implement updates in this function
 
+        # TODO: Implement updates in this function
+        mu = train_example.y - sigmoid(np.dot(self.w, train_example.x))
+        shrink_factor = 1 - 2 * self.eta(iteration) * self.lam
+        self.w += self.eta(iteration) * (mu * train_example.x)
+        for kk in range(len(self.w)):
+            if train_example.x[kk] != 0:
+                if kk != 0:
+                    if kk in self.last_update:
+                        self.w[kk] *= np.power(shrink_factor, iteration - self.last_update[kk])
+                    else:
+                        self.w[kk] *= np.power(shrink_factor, iteration + 1)
+                self.last_update[kk] = iteration
         return self.w
+
+
+
 
 def eta_schedule(iteration):
     # TODO (extra credit): Update this function to provide an
-    # EFFECTIVE iteration dependent learning rate size.  
-    return 1.0 
+    # EFFECTIVE iteration dependent learning rate size.
+    eta_initial = 0.5
+    alpha = 40
+    e = eta_initial / (1 + alpha * iteration / 1000)
+    return e
+
 
 def read_dataset(positive, negative, vocab, test_proportion=0.1):
     """
@@ -139,7 +158,6 @@ def read_dataset(positive, negative, vocab, test_proportion=0.1):
     return train, test, vocab
 
 
-
 if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("--lam", help="Weight of L2 regression",
@@ -147,11 +165,11 @@ if __name__ == "__main__":
     argparser.add_argument("--eta", help="Initial SG learning rate",
                            type=float, default=0.1, required=False)
     argparser.add_argument("--positive", help="Positive class",
-                           type=str, default="../data/hockey_baseball/positive", required=False)
+                           type=str, default="../data/autos_motorcycles/positive", required=False)
     argparser.add_argument("--negative", help="Negative class",
-                           type=str, default="../data/hockey_baseball/negative", required=False)
+                           type=str, default="../data/autos_motorcycles/negative", required=False)
     argparser.add_argument("--vocab", help="Vocabulary that can be features",
-                           type=str, default="../data/hockey_baseball/vocab", required=False)
+                           type=str, default="../data/autos_motorcycles/vocab", required=False)
     argparser.add_argument("--passes", help="Number of passes through train",
                            type=int, default=1, required=False)
 
@@ -161,10 +179,11 @@ if __name__ == "__main__":
     print("Read in %i train and %i test" % (len(train), len(test)))
 
     # Initialize model
-    lr = LogReg(len(vocab), args.lam, lambda x: args.eta)
+    lr = LogReg(len(vocab), args.lam, lambda x: eta_schedule(x))
 
     # Iterations
     iteration = 0
+    accu1 = []
     for pp in xrange(args.passes):
         random.shuffle(train)
         for ex in train:
@@ -172,6 +191,16 @@ if __name__ == "__main__":
             if iteration % 5 == 1:
                 train_lp, train_acc = lr.progress(train)
                 ho_lp, ho_acc = lr.progress(test)
+                accu1.append(ho_lp)
                 print("Update %i\tTP %f\tHP %f\tTA %f\tHA %f" %
                       (iteration, train_lp, ho_lp, train_acc, ho_acc))
             iteration += 1
+
+    order = lr.w.argsort()
+    print [vocab[x] for x in order]
+    # Best predictors
+
+    order = np.abs(lr.w).argsort()
+    print [vocab[x] for x in order]
+    # poorest predictors
+
