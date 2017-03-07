@@ -94,7 +94,6 @@ Material Overview
 - the workings of hard-margin SVM 
 - the workings of soft-margin SVM 
 - what a support vector is 
-- the SMO algorithm for determining the model 
 - ideas related to different kernels 
 
 
